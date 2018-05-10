@@ -1,18 +1,20 @@
+import doctest
 
 class Square(object):
     """A square object"""
 
     def __init__(self, value): #requires value upon initialization
-        self.up = 0 # default
-        self.down = 0 # default
-        self.left = 0 # default
-        self.right = 0 # default
+        self.up = None # default
+        self.down = None # default
+        self.left = None # default
+        self.right = None # default
         self.value = value # taken in above
         self.coordinates = None
 
 
 def carrot_missile(matrix):
-    """Takes in matrix, holds other function"""
+    """Takes in matrix, holds other functions
+    """
 
     object_matrix = iterate_through_matrix(matrix)
     center_indices = find_center(object_matrix)
@@ -25,6 +27,7 @@ def carrot_missile(matrix):
 def iterate_through_matrix(matrix):
     """Traverse through matrix
        define where each square is in relation to others
+
     """
     object_matrix = [] #creating a matrix to store objects that are created
 
@@ -56,7 +59,7 @@ def iterate_through_matrix(matrix):
                 cell.down = object_matrix[row_counter + 1][cell_counter]
             cell_counter += 1
         row_counter +=1
-
+    print object_matrix
     return object_matrix
 
 
@@ -96,10 +99,14 @@ def find_max_carrots(center_indices, object_matrix):
 
     max_value = 0
     for indices in center_indices:
-        if object_matrix[indices[0]][indices[1]] > max_value:
+        if (object_matrix[indices[0]][indices[1]]).value > max_value:
+
+            max_value = (object_matrix[indices[0]][indices[1]]).value
+            print "Max Value:", max_value
             coordinates = (indices[0],indices[1])
             square = object_matrix[indices[0]][indices[1]]
-            carrot_count = square.value
+    carrot_count = square.value
+    square.value = 0
     return (coordinates, carrot_count)
 
 
@@ -108,24 +115,36 @@ def carrot_seeking(coordinates, carrot_count, object_matrix):
        Stop when zero carrots are to be found """
 
     current_square = object_matrix[coordinates[0]][coordinates[1]]
-    new_squares = [current_square.up, current_square.down, current_square.right, current_square.left]
-    if (current_square.up.value + current_square.down.value + current_square.left.value + current_square.right.value) == 0: # fail fast, base case
+    surrounding_squares = [current_square.up, current_square.down, current_square.right, current_square.left]
+
+    new_squares = []
+    for square in surrounding_squares:
+        if square != None:
+            new_squares.append(square)
+
+    square_check = 0
+    if new_squares != []:
+        for square in new_squares:
+            square_check += square.value
+        print "Square Check", square_check
+
+
+    if square_check == 0:
         return carrot_count
     else:
-        highest_value = max(current_square.up.value,
-                            current_square.down.value,
-                            current_square.left.value,
-                            current_square.right.value)
-    for square in new_squares:
-        if square.value == highest_value:
-            current_square = square
-            print current_square
-            print "Up", current_square.up
-            print "Down", current_square.down
-            print "Left", current_square.left
-            print "Right", current_square.right
-            print current_square.value
-            print current_square.coordinates
-            coordinates = current_square.coordinates
-            carrot_count += current_square.value
-            carrot_seeking(coordinates, carrot_count, object_matrix)
+        highest_value = 0
+        for square in new_squares:
+            if square.value > highest_value:
+                highest_value = square.value
+                print "HV", highest_value
+
+        for square in new_squares:
+            if square.value == highest_value:
+                carrot_count += square.value
+                current_square = square
+                square.value = 0
+                coordinates = current_square.coordinates
+                print "Current Square Value:", current_square.value
+                print "Carrot Count:", carrot_count
+
+                carrot_seeking(coordinates, carrot_count, object_matrix)
